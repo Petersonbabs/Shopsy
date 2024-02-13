@@ -1,10 +1,11 @@
 const express = require("express");
 const morgan = require("morgan")
 const authRoutes = require("./routes/auth")
+const productRoutes = require("./routes/product");
 const app = express();
 
 
-app.use(express.json())``
+app.use(express.json())
 app.use(morgan("dev"))
 app.get("/", (req, res) => {
     res.status(200).json({
@@ -19,6 +20,7 @@ app.get("/api/v1", (req, res) => {
 })
 
 app.use("/api/v1/auth", authRoutes)
+app.use("/api/v1/", productRoutes)
 
 
 app.use("*", (req, res, next) => {
