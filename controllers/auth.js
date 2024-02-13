@@ -18,6 +18,7 @@ const signup = async (req, res) => {
             message: "Failed to register new user"
         })
     }
+    
     const token = signJWT(newUser._id, newUser.email);
     console.log(token);
 
@@ -29,4 +30,24 @@ const signup = async (req, res) => {
     })
 }
 
-module.exports = {signup}
+const login = async (req, res) => {
+    const {email, password} = req.body;
+
+    const user = await Users.findOne({email});
+
+    if(!user || !(await bcrypt.compare(password, user.password))){
+        res.status(404).json({
+            status: "fail",
+            message: "Incorrect email or password"
+        })
+    }
+    const token = signJWT(user._id, user.email);
+    res.status(200).json({
+        status: "success",
+        messgae: "Login successful",
+        user,
+        token
+    })
+}
+
+module.exports = {signup, login}
