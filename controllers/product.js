@@ -2,14 +2,9 @@ const Products = require("../models/product")
 
 // Add new product
 const addProduct = async (req, res) =>{
+    const userID = req.user.id;
     const {title, description, price} = req.body
-    const product = await Products.create({title , description, price});
-
-    res.status(201).json({
-        status: "Success",
-        message: "Product succesfully added",
-        product
-    })
+    const product = await Products.create({owner: userID, title , description, price})
 
     if(!product){
         res.status(404).json({
@@ -19,21 +14,21 @@ const addProduct = async (req, res) =>{
         })
     }
 
+    res.status(201).json({
+        status: "Success",
+        message: "Product succesfully added",
+        product
+    })
+
+  
+
 }
 
 
 // Get all products 
 const getProducts = async (req, res) =>{
+    const products = await Products.find().populate("owner")
     
-    const products = await Products.find()
-    
-
-    products.length == 0 ? res.send("No products found") : res.status(201).json({
-        status: "Success",
-        message: "All Products succesfully fetched",
-        products
-    })
-
     if(!products){
         res.status(404).json({
             status: "Error",
@@ -41,6 +36,15 @@ const getProducts = async (req, res) =>{
             
         })
     }
+
+    res.status(201).json({
+        status: "Success",
+        message: "All Products succesfully fetched",
+        results: products.length,
+        products
+    })
+
+
 
 }
 
@@ -50,12 +54,6 @@ const getProduct = async (req, res) => {
     const {id} = req.params
     const product = await Products.findById(id)
 
-    res.status(201).json({
-        status: "Success",
-        message: "Product succesfully fetched",
-        product
-    })
-
     if(!product){
         res.status(404).json({
             status: "Error",
@@ -63,18 +61,21 @@ const getProduct = async (req, res) => {
             
         })
     }
+
+    res.status(201).json({
+        status: "Success",
+        message: "Product succesfully fetched",
+        product
+    })   
 }
 
 
 // update product
 const updateProduct = async (req, res) => {
     const {id} = req.params
-    const product = await Products.findByIdAndUpdate(id, req.body)
-
-    res.status(201).json({
-        status: "Success",
-        message: "Product succesfully Updated",
-        product
+    const product = await Products.findByIdAndUpdate(id, req.body, {
+        new: true,
+        runValidators: true
     })
 
     if(!product){
@@ -84,6 +85,14 @@ const updateProduct = async (req, res) => {
             
         })
     }
+
+    res.status(200).json({
+        status: "Success",
+        message: "Product succesfully Updated",
+        product
+    })
+
+  
 }
 
 
@@ -91,13 +100,7 @@ const updateProduct = async (req, res) => {
 const deleteProduct = async (req, res) => {
     const {id} = req.params
     const deleteProduct = await Products.findByIdAndDelete(id)
-
-    res.status(201).json({
-        status: "Success",
-        message: "Product succesfully deleted",
-        deleteProduct
-    })
-
+    
     if(!deleteProduct){
         res.status(404).json({
             status: "Error",
@@ -105,6 +108,12 @@ const deleteProduct = async (req, res) => {
             
         })
     }
+
+    res.status(200).json({
+        status: "Success",
+        message: "Product succesfully deleted",
+    })
+
 }
 
 module.exports = {addProduct, getProducts , getProduct, updateProduct, deleteProduct}

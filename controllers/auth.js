@@ -30,10 +30,14 @@ const signup = async (req, res) => {
     })
 }
 
+
+
+// login
+
 const login = async (req, res) => {
     const {email, password} = req.body;
 
-    const user = await Users.findOne({email});
+    const user = await Users.findOne({email}).select("+password")
 
     if(!user || !(await bcrypt.compare(password, user.password))){
         res.status(404).json({

@@ -20,7 +20,7 @@ app.get("/api/v1", (req, res) => {
 })
 
 app.use("/api/v1/auth", authRoutes)
-app.use("/api/v1/", productRoutes)
+app.use("/api/v1/products", productRoutes)
 
 
 app.use("*", (req, res, next) => {
