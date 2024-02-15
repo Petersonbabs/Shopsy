@@ -48,7 +48,7 @@ const login = async (req, res) => {
     const token = signJWT(user._id, user.email);
     res.status(200).json({
         status: "success",
-        messgae: "Login successful",
+        message: "Login successful",
         user,
         token
     })

@@ -1,16 +1,19 @@
-const Products = require("../models/product")
+const Products = require("../models/product");
+const Users = require("../models/user");
+const { getUsers } = require("./user");
 
 // Add new product
-const addProduct = async (req, res) =>{
+const addProduct = async (req, res) => {
     const userID = req.user.id;
-    const {title, description, price} = req.body
-    const product = await Products.create({owner: userID, title , description, price})
+    const { title, description, price } = req.body;
+    const product = await Products.create({ owner: userID, title, description, price });
 
-    if(!product){
+
+    if (!product) {
         res.status(404).json({
             status: "Error",
             message: "An error occured while adding product.",
-            
+
         })
     }
 
@@ -20,20 +23,21 @@ const addProduct = async (req, res) =>{
         product
     })
 
-  
+
 
 }
 
 
 // Get all products 
-const getProducts = async (req, res) =>{
+const getProducts = async (req, res) => {
+
     const products = await Products.find().populate("owner")
-    
-    if(!products){
+
+    if (!products) {
         res.status(404).json({
             status: "Error",
             message: "An error occured while fetching all products.",
-            
+
         })
     }
 
@@ -51,14 +55,14 @@ const getProducts = async (req, res) =>{
 
 // get single product
 const getProduct = async (req, res) => {
-    const {id} = req.params
+    const { id } = req.params
     const product = await Products.findById(id)
 
-    if(!product){
+    if (!product) {
         res.status(404).json({
             status: "Error",
             message: "An error occured while fetching product.",
-            
+
         })
     }
 
@@ -66,46 +70,94 @@ const getProduct = async (req, res) => {
         status: "Success",
         message: "Product succesfully fetched",
         product
-    })   
+    })
 }
 
 
-// update product
-const updateProduct = async (req, res) => {
-    const {id} = req.params
-    const product = await Products.findByIdAndUpdate(id, req.body, {
-        new: true,
-        runValidators: true
-    })
+// get owners products
+const getOwnerProducts = async (req, res) => {
+    const userId = req.params.id;
+    const products = await Products.find({ owner: userId })
 
-    if(!product){
+    if (!products) {
         res.status(404).json({
-            status: "Error",
-            message: "An error occured while updating product..",
-            
+            status: "failed",
+            message: "Unable to fetch products for this user"
         })
     }
 
     res.status(200).json({
-        status: "Success",
-        message: "Product succesfully Updated",
-        product
+        status: "success",
+        message: "Owners products fetched successfully!",
+        result: products.length,
+        products
+    })
+}
+
+
+
+// update product
+const updateProduct = async (req, res) => {
+    const userID = req.user.id;
+    const productId = req.params.id;
+    const {title, description, price} = req.body
+
+    const product = await Products.findById(productId);
+    
+    // if(product.owner.equals(userID))
+    if (product.owner.toString() !== userID) {
+        res.status(404).json({
+            status: "Error",
+            message: "You're not authorized to update this product.",
+
+        })
+        return
+    }
+
+    // product.title = title
+    // product.description = description
+    // product.price = price
+
+    // await product.save()
+    const updatedProduct = await Products.findByIdAndUpdate(productId, req.body, {
+        new: true,
+        runValidators: true
     })
 
-  
+
+    res.status(200).json({
+        status: "Success",
+        message: "Product succesfully Updated",
+        product: updatedProduct
+    })
+
+
 }
 
 
 // delete product
 const deleteProduct = async (req, res) => {
-    const {id} = req.params
-    const deleteProduct = await Products.findByIdAndDelete(id)
+    const productId  = req.params.id;
+    const userID = req.user.id
     
-    if(!deleteProduct){
+    const product = await Products.findById(productId);
+
+
+    if (product.owner.toString() !== userID) {
         res.status(404).json({
             status: "Error",
-            message: "An error occured while deleting product.",
-            
+            message: "You're not authorized to delete this product.",
+
+        })
+        return
+    }
+    
+    const deletedProduct = await Products.findByIdAndDelete(productId);
+
+    if(!deletedProduct){
+        res.status(404).json({
+            status: "fail",
+            message: "Failed to delete Product"
         })
     }
 
@@ -116,4 +168,4 @@ const deleteProduct = async (req, res) => {
 
 }
 
-module.exports = {addProduct, getProducts , getProduct, updateProduct, deleteProduct}
+module.exports = { addProduct, getProducts, getProduct, updateProduct, deleteProduct, getOwnerProducts }

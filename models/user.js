@@ -20,7 +20,13 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please provide a password'],
         select: false
-    }
+    },
+
+
+    // products: [{
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: "Products"
+    // }]
 })
 
 const Users = mongoose.model("Users", userSchema);
