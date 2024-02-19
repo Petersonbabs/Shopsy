@@ -100,7 +100,6 @@ const getOwnerProducts = async (req, res) => {
 const updateProduct = async (req, res) => {
     const userID = req.user.id;
     const productId = req.params.id;
-    const {title, description, price} = req.body
 
     const product = await Products.findById(productId);
     

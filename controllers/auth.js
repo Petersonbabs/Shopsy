@@ -3,13 +3,15 @@ const bcrypt = require('bcryptjs')
 const signJWT = require("./../utils/jwt");
 
 const signup = async (req, res) => {
-    const {email, password} = req.body;
+    const {email, password, firstname, lastname} = req.body;
     const salt = await bcrypt.genSalt(12);
     const hashedpassword = await bcrypt.hash(password, salt);
 
     const newUser = await Users.create({
         email,
-        password: hashedpassword
+        password: hashedpassword,
+        firstname,
+        lastname
     })
 
     if(!newUser){
