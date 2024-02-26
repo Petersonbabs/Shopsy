@@ -1,12 +1,14 @@
 const Products = require("../models/product");
 const Users = require("../models/user");
 const { getUsers } = require("./user");
+const {uploadImage} = require("../middlewares/uploads");
 
 // Add new product
 const addProduct = async (req, res) => {
     const userID = req.user.id;
+    const image = await uploadImage("https://cdn.pixabay.com/photo/2023/08/21/17/44/flower-8204791_1280.jpg");
     const { title, description, price } = req.body;
-    const product = await Products.create({ owner: userID, title, description, price });
+    const product = await Products.create({ owner: userID, title, description, price, image });
 
 
     if (!product) {
@@ -26,7 +28,6 @@ const addProduct = async (req, res) => {
 
 
 }
-
 
 // Get all products 
 const getProducts = async (req, res) => {
@@ -52,18 +53,16 @@ const getProducts = async (req, res) => {
 
 }
 
-
 // get single product
-const getProduct = async (req, res) => {
-    const { id } = req.params
+const getProduct = async (req, res, next) => {
+    try {
+        const { id } = req.params
     const product = await Products.findById(id)
 
     if (!product) {
-        res.status(404).json({
-            status: "Error",
-            message: "An error occured while fetching product.",
-
-        })
+       const error = new Error("Failed to fetch product with the specified ID");
+       error.statusCode = 404;
+       return next(error)
     }
 
     res.status(201).json({
@@ -71,8 +70,10 @@ const getProduct = async (req, res) => {
         message: "Product succesfully fetched",
         product
     })
+    } catch (error) {
+        next(error)
+    }
 }
-
 
 // get owners products
 const getOwnerProducts = async (req, res) => {
@@ -93,8 +94,6 @@ const getOwnerProducts = async (req, res) => {
         products
     })
 }
-
-
 
 // update product
 const updateProduct = async (req, res) => {
@@ -132,7 +131,6 @@ const updateProduct = async (req, res) => {
 
 
 }
-
 
 // delete product
 const deleteProduct = async (req, res) => {

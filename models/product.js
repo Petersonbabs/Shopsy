@@ -7,6 +7,13 @@ const product = new mongoose.Schema({
         required: [true, "Product owner is required"],
         ref: "Users"
     },
+
+    image: {
+        type: String,
+        required: [true, "Please add an image to your product"]
+
+    },
+
     title: {
         type: String,
         required: [true, "You must add a title for your product"]
