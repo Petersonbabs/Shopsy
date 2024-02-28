@@ -140,10 +140,12 @@ const deleteProduct = async (req, res) => {
     const product = await Products.findById(productId);
 
 
-    if (product.owner.toString() !== userID) {
+    if (product != userID) {
         res.status(404).json({
             status: "Error",
             message: "You're not authorized to delete this product.",
+            product,
+            userID
 
         })
         return

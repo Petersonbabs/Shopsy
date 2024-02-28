@@ -1,48 +1,48 @@
 const express = require("express");
 const cors = require("cors")
 const morgan = require("morgan")
-// const multer = require('multer')
 const authRoutes = require("./routes/auth")
 const productRoutes = require("./routes/product");
 const userRoutes = require("./routes/user");
 const errorHandler = require("./middlewares/error");
+const { upload, dataUri } = require("./middlewares/multer")
+const { cloudinaryConfig, uploader } = require("./middlewares/cloudinary")
 const app = express();
 
-// const storage = multer.diskStorage({
-
-//     destination: function (req, file, callback) {
-//         callback(null, '/src/');
-
-//     },
-
-//     filename: function (req, file, callback) {
-//         callback(null, file.fieldname);
-//     }
-// });
-
-// const upload = multer({ storage: 'storage' });
 
 app.use(express.json())
 app.use(cors())
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"))
+app.use("*", cloudinaryConfig)
 
 
 
-// app.post('/api/v1/upload', upload.single('image'), (req, res) => {
-//     if (!req.file) {
-//         console.log("No file received");
-//         return res.send({
-//             success: false
-//         });
+app.post('/api/v1/upload', upload.single('image'), async (req, res) => {
+    if (!req.file) {
+        console.log("No file received");
+        return res.send({
+            success: false
+        });
 
-//     } else {
-//         console.log('file received');
-//         return res.send({
-//             success: true
-//         })
-//     }
-// });
+    } else {
+
+        const name = req.body.name
+        const file = dataUri(req).content;
+
+        const result = await uploader.upload(file, {
+            folder: "shopsy/productImages"
+        })
+
+        return res.status(201).json({
+            status: "success",
+            data: {
+                image: result.secure_url,
+                name
+            }
+        })
+    }
+});
 
 app.get("/", (req, res) => {
     res.status(200).json({

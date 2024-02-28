@@ -7,12 +7,14 @@ const yup = require('yup')
 // signup
 const signup = async (req, res, next) => {
     const { email, password, firstname, lastname } = req.body;
+   
     const rules = yup.object().shape({
         email: yup.string().email("É no correct").required(),
         firstname: yup.string().required(),
         lastname: yup.string().required(),
         password: yup.string().matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])[A-Za-z0-9#@]{8,}$/, 'Please use a very strong password').required()
     })
+
     try {
         await rules.validate({ email, password, firstname, lastname })
         const salt = await bcrypt.genSalt(12);
@@ -41,6 +43,7 @@ const signup = async (req, res, next) => {
             user: newUser,
             token
         })
+        
     } catch (error) {
         console.log(error)
         next(error)
